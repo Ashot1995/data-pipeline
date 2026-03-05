@@ -1,0 +1,38 @@
+{
+  "dashboard": {
+    "title": "IoT Device Status",
+    "uid": "operations-devices",
+    "schemaVersion": 36,
+    "version": 1,
+    "tags": ["operations", "devices", "iot"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {"from": "now-6h", "to": "now"},
+    "templating": {"list": []},
+    "panels": [
+      {
+        "id": 1,
+        "title": "Devices (last seen, record count)",
+        "type": "table",
+        "gridPos": {"x": 0, "y": 0, "w": 24, "h": 8},
+        "targets": [{"refId": "A", "datasource": {"type": "postgres", "uid": "postgres"}, "rawQuery": true, "rawSql": "SELECT device_id AS \"Device\", record_count AS \"Records\", first_seen AS \"First seen\", last_seen AS \"Last seen\" FROM (SELECT device_id, COUNT(*) AS record_count, MIN(stored_timestamp) AS first_seen, MAX(stored_timestamp) AS last_seen FROM sensor_data WHERE device_id IS NOT NULL GROUP BY device_id) t ORDER BY last_seen DESC", "format": "table"}]
+      },
+      {
+        "id": 2,
+        "title": "Records in last 10 minutes",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 8, "w": 6, "h": 3},
+        "targets": [{"refId": "A", "datasource": {"type": "postgres", "uid": "postgres"}, "rawQuery": true, "rawSql": "SELECT COUNT(*) FROM sensor_data WHERE stored_timestamp > NOW() - INTERVAL '10 minutes'", "format": "table"}],
+        "fieldConfig": {"defaults": {"unit": "short"}}
+      },
+      {
+        "id": 3,
+        "title": "Distinct devices (last 1h)",
+        "type": "stat",
+        "gridPos": {"x": 6, "y": 8, "w": 6, "h": 3},
+        "targets": [{"refId": "A", "datasource": {"type": "postgres", "uid": "postgres"}, "rawQuery": true, "rawSql": "SELECT COUNT(DISTINCT device_id) FROM sensor_data WHERE stored_timestamp > NOW() - INTERVAL '1 hour' AND device_id IS NOT NULL", "format": "table"}],
+        "fieldConfig": {"defaults": {"unit": "short"}}
+      }
+    ]
+  }
+}

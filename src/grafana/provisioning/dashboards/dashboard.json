@@ -1,0 +1,569 @@
+{
+  "dashboard": {
+    "title": "Real-Time Sensor Data Dashboard",
+    "uid": "sensor-monitor-v2",
+    "schemaVersion": 36,
+    "version": 2,
+    "tags": ["sensors", "iot", "real-time"],
+    "timezone": "browser",
+    "refresh": "5s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "annotations": {"list": []},
+    "links": [],
+    "templating": {
+      "list": [
+        {
+          "type": "query",
+          "name": "device",
+          "label": "Device",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "query": "SELECT DISTINCT device_id FROM sensor_data WHERE device_id IS NOT NULL ORDER BY device_id",
+          "refresh": 2,
+          "includeAll": true,
+          "allValue": "All",
+          "multi": false,
+          "sort": 1,
+          "hide": 0
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Current Temperature",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 0, "w": 4, "h": 4},
+        "targets": [
+          {
+            "datasource": {"type": "postgres", "uid": "postgres"},
+            "editorMode": "code",
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT temperature FROM sensor_data WHERE $__timeFilter(stored_timestamp) AND ('$device' = 'All' OR device_id = '$device') ORDER BY stored_timestamp DESC LIMIT 1",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "background",
+          "justifyMode": "auto",
+          "textMode": "auto",
+          "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "celsius",
+            "decimals": 1,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "blue"},
+                {"value": 25, "color": "green"},
+                {"value": 30, "color": "yellow"},
+                {"value": 35, "color": "red"}
+              ]
+            },
+            "color": {"mode": "thresholds"}
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Current Humidity",
+        "type": "stat",
+        "gridPos": {"x": 4, "y": 0, "w": 4, "h": 4},
+        "targets": [
+          {
+            "datasource": {"type": "postgres", "uid": "postgres"},
+            "editorMode": "code",
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT humidity FROM sensor_data WHERE $__timeFilter(stored_timestamp) AND ('$device' = 'All' OR device_id = '$device') ORDER BY stored_timestamp DESC LIMIT 1",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "background",
+          "justifyMode": "auto",
+          "textMode": "auto",
+          "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 1,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "red"},
+                {"value": 30, "color": "yellow"},
+                {"value": 40, "color": "green"},
+                {"value": 70, "color": "yellow"},
+                {"value": 80, "color": "red"}
+              ]
+            },
+            "color": {"mode": "thresholds"}
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Current Gas Level",
+        "type": "stat",
+        "gridPos": {"x": 8, "y": 0, "w": 4, "h": 4},
+        "targets": [
+          {
+            "datasource": {"type": "postgres", "uid": "postgres"},
+            "editorMode": "code",
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT gas FROM sensor_data WHERE $__timeFilter(stored_timestamp) AND ('$device' = 'All' OR device_id = '$device') ORDER BY stored_timestamp DESC LIMIT 1",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "background",
+          "justifyMode": "auto",
+          "textMode": "auto",
+          "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ppm",
+            "decimals": 1,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "green"},
+                {"value": 200, "color": "yellow"},
+                {"value": 300, "color": "orange"},
+                {"value": 400, "color": "red"}
+              ]
+            },
+            "color": {"mode": "thresholds"}
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Avg Latency",
+        "type": "stat",
+        "gridPos": {"x": 12, "y": 0, "w": 4, "h": 4},
+        "targets": [
+          {
+            "datasource": {"type": "postgres", "uid": "postgres"},
+            "editorMode": "code",
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT AVG(latency_ms) AS avg_latency FROM sensor_data WHERE $__timeFilter(stored_timestamp) AND latency_ms IS NOT NULL AND ('$device' = 'All' OR device_id = '$device')",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value",
+          "justifyMode": "auto",
+          "textMode": "auto",
+          "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "decimals": 1,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "green"},
+                {"value": 100, "color": "yellow"},
+                {"value": 500, "color": "red"}
+              ]
+            },
+            "color": {"mode": "thresholds"}
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Total Records",
+        "type": "stat",
+        "gridPos": {"x": 16, "y": 0, "w": 4, "h": 4},
+        "targets": [
+          {
+            "datasource": {"type": "postgres", "uid": "postgres"},
+            "editorMode": "code",
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT COUNT(*) AS total FROM sensor_data WHERE $__timeFilter(stored_timestamp) AND ('$device' = 'All' OR device_id = '$device')",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value",
+          "justifyMode": "auto",
+          "textMode": "auto",
+          "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [{"value": null, "color": "blue"}]
+            },
+            "color": {"mode": "fixed", "fixedColor": "blue"}
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Active Devices",
+        "type": "stat",
+        "gridPos": {"x": 20, "y": 0, "w": 4, "h": 4},
+        "targets": [
+          {
+            "datasource": {"type": "postgres", "uid": "postgres"},
+            "editorMode": "code",
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT COUNT(DISTINCT device_id) AS devices FROM sensor_data WHERE $__timeFilter(stored_timestamp) AND device_id IS NOT NULL",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value",
+          "justifyMode": "auto",
+          "textMode": "auto",
+          "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [{"value": null, "color": "purple"}]
+            },
+            "color": {"mode": "fixed", "fixedColor": "purple"}
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Temperature Over Time",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
+        "targets": [
+          {
+            "datasource": {"type": "postgres", "uid": "postgres"},
+            "editorMode": "code",
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT stored_timestamp AS time, temperature AS \"Temperature\" FROM sensor_data WHERE $__timeFilter(stored_timestamp) AND ('$device' = 'All' OR device_id = '$device') ORDER BY time",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "celsius",
+            "min": 0,
+            "max": 50,
+            "color": {"mode": "fixed", "fixedColor": "red"},
+            "custom": {"lineWidth": 2, "fillOpacity": 10},
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "green"},
+                {"value": 30, "color": "yellow"},
+                {"value": 35, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "list", "placement": "bottom"},
+          "tooltip": {"mode": "single"}
+        }
+      },
+      {
+        "id": 8,
+        "title": "Humidity Over Time",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8},
+        "targets": [
+          {
+            "datasource": {"type": "postgres", "uid": "postgres"},
+            "editorMode": "code",
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT stored_timestamp AS time, humidity AS \"Humidity\" FROM sensor_data WHERE $__timeFilter(stored_timestamp) AND ('$device' = 'All' OR device_id = '$device') ORDER BY time",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "color": {"mode": "fixed", "fixedColor": "blue"},
+            "custom": {"lineWidth": 2, "fillOpacity": 10}
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "list", "placement": "bottom"},
+          "tooltip": {"mode": "single"}
+        }
+      },
+      {
+        "id": 9,
+        "title": "Gas Concentration Over Time",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 12, "w": 12, "h": 8},
+        "targets": [
+          {
+            "datasource": {"type": "postgres", "uid": "postgres"},
+            "editorMode": "code",
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT stored_timestamp AS time, gas AS \"Gas\" FROM sensor_data WHERE $__timeFilter(stored_timestamp) AND ('$device' = 'All' OR device_id = '$device') ORDER BY time",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ppm",
+            "min": 0,
+            "max": 500,
+            "color": {"mode": "fixed", "fixedColor": "orange"},
+            "custom": {"lineWidth": 2, "fillOpacity": 10},
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "green"},
+                {"value": 200, "color": "yellow"},
+                {"value": 300, "color": "orange"},
+                {"value": 400, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "list", "placement": "bottom"},
+          "tooltip": {"mode": "single"}
+        }
+      },
+      {
+        "id": 10,
+        "title": "All Sensors Combined",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 12, "w": 12, "h": 8},
+        "targets": [
+          {
+            "datasource": {"type": "postgres", "uid": "postgres"},
+            "editorMode": "code",
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT stored_timestamp AS time, temperature AS \"Temperature (°C)\", humidity AS \"Humidity (%)\", gas AS \"Gas (ppm)\" FROM sensor_data WHERE $__timeFilter(stored_timestamp) AND ('$device' = 'All' OR device_id = '$device') ORDER BY time",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {"lineWidth": 2, "fillOpacity": 5}
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Temperature (°C)"},
+              "properties": [
+                {"id": "unit", "value": "celsius"},
+                {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Humidity (%)"},
+              "properties": [
+                {"id": "unit", "value": "percent"},
+                {"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Gas (ppm)"},
+              "properties": [
+                {"id": "unit", "value": "ppm"},
+                {"id": "color", "value": {"mode": "fixed", "fixedColor": "orange"}}
+              ]
+            }
+          ]
+        },
+        "options": {
+          "legend": {"displayMode": "list", "placement": "bottom"},
+          "tooltip": {"mode": "multi"}
+        }
+      },
+      {
+        "id": 11,
+        "title": "End-to-End Latency",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 20, "w": 16, "h": 6},
+        "targets": [
+          {
+            "datasource": {"type": "postgres", "uid": "postgres"},
+            "editorMode": "code",
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT stored_timestamp AS time, latency_ms AS \"Latency (ms)\" FROM sensor_data WHERE $__timeFilter(stored_timestamp) AND latency_ms IS NOT NULL AND ('$device' = 'All' OR device_id = '$device') ORDER BY time",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "min": 0,
+            "color": {"mode": "thresholds"},
+            "custom": {"lineWidth": 2, "fillOpacity": 10},
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "green"},
+                {"value": 100, "color": "yellow"},
+                {"value": 500, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "list", "placement": "bottom"},
+          "tooltip": {"mode": "single"}
+        }
+      },
+      {
+        "id": 12,
+        "title": "Max Latency",
+        "type": "stat",
+        "gridPos": {"x": 16, "y": 20, "w": 4, "h": 6},
+        "targets": [
+          {
+            "datasource": {"type": "postgres", "uid": "postgres"},
+            "editorMode": "code",
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT MAX(latency_ms) AS max_latency FROM sensor_data WHERE $__timeFilter(stored_timestamp) AND latency_ms IS NOT NULL AND ('$device' = 'All' OR device_id = '$device')",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value",
+          "justifyMode": "auto",
+          "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "decimals": 1,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "green"},
+                {"value": 500, "color": "yellow"},
+                {"value": 1000, "color": "red"}
+              ]
+            },
+            "color": {"mode": "thresholds"}
+          }
+        }
+      },
+      {
+        "id": 13,
+        "title": "P95 Latency",
+        "type": "stat",
+        "gridPos": {"x": 20, "y": 20, "w": 4, "h": 6},
+        "targets": [
+          {
+            "datasource": {"type": "postgres", "uid": "postgres"},
+            "editorMode": "code",
+            "format": "table",
+            "rawQuery": true,
+            "rawSql": "SELECT PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY latency_ms) AS p95_latency FROM sensor_data WHERE $__timeFilter(stored_timestamp) AND latency_ms IS NOT NULL AND ('$device' = 'All' OR device_id = '$device')",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "none",
+          "colorMode": "value",
+          "justifyMode": "auto",
+          "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "decimals": 1,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": null, "color": "green"},
+                {"value": 200, "color": "yellow"},
+                {"value": 500, "color": "red"}
+              ]
+            },
+            "color": {"mode": "thresholds"}
+          }
+        }
+      },
+      {
+        "id": 14,
+        "title": "5-Minute Aggregated Averages",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 26, "w": 24, "h": 8},
+        "targets": [
+          {
+            "datasource": {"type": "postgres", "uid": "postgres"},
+            "editorMode": "code",
+            "format": "time_series",
+            "rawQuery": true,
+            "rawSql": "SELECT time_bucket(make_interval(mins => 5), stored_timestamp) AS time, AVG(temperature) AS \"Avg Temperature (°C)\", AVG(humidity) AS \"Avg Humidity (%)\", AVG(gas) AS \"Avg Gas (ppm)\" FROM sensor_data WHERE $__timeFilter(stored_timestamp) AND ('$device' = 'All' OR device_id = '$device') GROUP BY time ORDER BY time",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {"lineWidth": 2, "fillOpacity": 15, "spanNulls": true}
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Avg Temperature (°C)"},
+              "properties": [
+                {"id": "unit", "value": "celsius"},
+                {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Avg Humidity (%)"},
+              "properties": [
+                {"id": "unit", "value": "percent"},
+                {"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}
+              ]
+            },
+            {
+              "matcher": {"id": "byName", "options": "Avg Gas (ppm)"},
+              "properties": [
+                {"id": "unit", "value": "ppm"},
+                {"id": "color", "value": {"mode": "fixed", "fixedColor": "orange"}}
+              ]
+            }
+          ]
+        },
+        "options": {
+          "legend": {"displayMode": "list", "placement": "bottom"},
+          "tooltip": {"mode": "multi"}
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,142 @@
+# Grafana alert rules — PostgreSQL (time series) and Prometheus
+# Queries must return time + value for threshold evaluation.
+
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: sensor_data_alerts
+    folder: Sensor Alerts
+    interval: 30s
+    rules:
+      - uid: temperature_high
+        title: High Temperature Alert
+        condition: A
+        data:
+          - refId: A
+            datasourceUid: postgres
+            model:
+              rawSql: "SELECT date_trunc('minute', NOW()) AS time, (SELECT AVG(temperature) FROM sensor_data WHERE stored_timestamp > NOW() - INTERVAL '5 minutes') AS value"
+              format: time_series
+              refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          description: "Temperature has been above 35°C (avg over 5m)"
+          summary: High temperature detected
+        labels:
+          severity: warning
+
+      - uid: temperature_low
+        title: Low Temperature Alert
+        condition: A
+        data:
+          - refId: A
+            datasourceUid: postgres
+            model:
+              rawSql: "SELECT date_trunc('minute', NOW()) AS time, (SELECT AVG(temperature) FROM sensor_data WHERE stored_timestamp > NOW() - INTERVAL '5 minutes') AS value"
+              format: time_series
+              refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          description: "Temperature has been below 10°C (avg over 5m)"
+          summary: Low temperature detected
+        labels:
+          severity: warning
+
+      - uid: humidity_high
+        title: High Humidity Alert
+        condition: A
+        data:
+          - refId: A
+            datasourceUid: postgres
+            model:
+              rawSql: "SELECT date_trunc('minute', NOW()) AS time, (SELECT AVG(humidity) FROM sensor_data WHERE stored_timestamp > NOW() - INTERVAL '5 minutes') AS value"
+              format: time_series
+              refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          description: "Humidity above 85% (avg over 5m)"
+          summary: High humidity detected
+        labels:
+          severity: warning
+
+      - uid: gas_high
+        title: High Gas Concentration Alert
+        condition: A
+        data:
+          - refId: A
+            datasourceUid: postgres
+            model:
+              rawSql: "SELECT date_trunc('minute', NOW()) AS time, (SELECT AVG(gas) FROM sensor_data WHERE stored_timestamp > NOW() - INTERVAL '5 minutes') AS value"
+              format: time_series
+              refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          description: "Gas concentration above 400 PPM (avg over 5m)"
+          summary: High gas concentration
+        labels:
+          severity: critical
+
+      - uid: latency_high
+        title: High Latency Alert
+        condition: A
+        data:
+          - refId: A
+            datasourceUid: postgres
+            model:
+              rawSql: "SELECT date_trunc('minute', NOW()) AS time, (SELECT PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY latency_ms) FROM sensor_data WHERE stored_timestamp > NOW() - INTERVAL '5 minutes' AND latency_ms IS NOT NULL) AS value"
+              format: time_series
+              refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+        noDataState: NoData
+        execErrState: Alerting
+        for: 5m
+        annotations:
+          description: "P95 latency above 500 ms over 5 minutes"
+          summary: High latency detected
+        labels:
+          severity: warning
+
+      - uid: no_data_received
+        title: No Data Received Alert
+        condition: A
+        data:
+          - refId: A
+            datasourceUid: postgres
+            model:
+              rawSql: "SELECT date_trunc('minute', NOW()) AS time, (SELECT COUNT(*) FROM sensor_data WHERE stored_timestamp > NOW() - INTERVAL '10 minutes') AS value"
+              format: time_series
+              refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+        noDataState: Alerting
+        execErrState: Alerting
+        for: 2m
+        annotations:
+          description: No sensor data received in the last 10 minutes
+          summary: Data collection stopped
+        labels:
+          severity: critical

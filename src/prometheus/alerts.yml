@@ -1,0 +1,74 @@
+# Prometheus alerting rules for Real-Time Data Collection and Monitoring System
+
+groups:
+  - name: backend_alerts
+    interval: 30s
+    rules:
+      - alert: BackendDown
+        expr: up{job="backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Backend service is down"
+          description: "Backend API has been down for more than 1 minute."
+
+      - alert: HighRequestLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="backend"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High request latency detected"
+          description: "95th percentile latency is above 1 second for 5 minutes."
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{job="backend"}[5m]) > 0.01 and (rate(http_requests_total{job="backend", status=~"5.."}[5m]) / rate(http_requests_total{job="backend"}[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is above 5% for 5 minutes."
+
+  - name: database_alerts
+    interval: 30s
+    rules:
+      - alert: DatabaseConnectionHigh
+        expr: pg_stat_database_numbackends{datname="sensor_db"} > 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High database connections"
+          description: "Number of database connections is above 50."
+
+      # Requires pg_stat_statements extension and exporter config - disabled by default
+      # - alert: DatabaseSlowQueries
+      #   expr: pg_stat_statements_mean_exec_time > 1
+      #   for: 5m
+      #   labels:
+      #     severity: warning
+      #   annotations:
+      #     summary: "Slow database queries detected"
+
+  - name: cache_alerts
+    interval: 30s
+    rules:
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis cache is down"
+          description: "Redis cache service has been down for more than 1 minute."
+
+      - alert: HighCacheMissRate
+        expr: (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m])) > 0.01 and rate(redis_keyspace_misses_total[5m]) / (rate(redis_keyspace_hits_total[5m]) + rate(redis_keyspace_misses_total[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High cache miss rate"
+          description: "Cache miss rate is above 50% for 5 minutes."

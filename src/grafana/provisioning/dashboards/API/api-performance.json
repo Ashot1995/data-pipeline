@@ -1,0 +1,61 @@
+{
+  "dashboard": {
+    "title": "API Performance",
+    "uid": "api-performance",
+    "schemaVersion": 36,
+    "version": 1,
+    "tags": ["api", "performance", "backend"],
+    "timezone": "browser",
+    "refresh": "15s",
+    "time": {"from": "now-1h", "to": "now"},
+    "templating": {"list": []},
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request duration p95 (s)",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 6},
+        "targets": [{"refId": "A", "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"backend\"}[5m]))", "legendFormat": "p95 {{method}} {{endpoint}}", "datasource": {"type": "prometheus", "uid": "prometheus"}}],
+        "fieldConfig": {"defaults": {"unit": "s"}}
+      },
+      {
+        "id": 2,
+        "title": "Request duration p50 / p99",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 6},
+        "targets": [
+          {"refId": "A", "expr": "histogram_quantile(0.5, rate(http_request_duration_seconds_bucket{job=\"backend\"}[5m]))", "legendFormat": "p50", "datasource": {"type": "prometheus", "uid": "prometheus"}},
+          {"refId": "B", "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job=\"backend\"}[5m]))", "legendFormat": "p99", "datasource": {"type": "prometheus", "uid": "prometheus"}}
+        ],
+        "fieldConfig": {"defaults": {"unit": "s"}}
+      },
+      {
+        "id": 3,
+        "title": "DB operation duration",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 6, "w": 12, "h": 6},
+        "targets": [{"refId": "A", "expr": "rate(db_operation_duration_seconds_sum{job=\"backend\"}[5m]) / rate(db_operation_duration_seconds_count{job=\"backend\"}[5m])", "legendFormat": "{{operation}}", "datasource": {"type": "prometheus", "uid": "prometheus"}}],
+        "fieldConfig": {"defaults": {"unit": "s"}}
+      },
+      {
+        "id": 4,
+        "title": "Sensor ingestion latency (Prometheus)",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 6, "w": 12, "h": 6},
+        "targets": [{"refId": "A", "expr": "histogram_quantile(0.95, rate(sensor_data_latency_ms_bucket{job=\"backend\"}[5m]))", "legendFormat": "p95", "datasource": {"type": "prometheus", "uid": "prometheus"}}],
+        "fieldConfig": {"defaults": {"unit": "ms"}}
+      },
+      {
+        "id": 5,
+        "title": "Cache hit / miss rate",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 12, "w": 24, "h": 5},
+        "targets": [
+          {"refId": "A", "expr": "rate(cache_operations_total{job=\"backend\", status=\"hit\"}[5m])", "legendFormat": "hit", "datasource": {"type": "prometheus", "uid": "prometheus"}},
+          {"refId": "B", "expr": "rate(cache_operations_total{job=\"backend\", status=\"miss\"}[5m])", "legendFormat": "miss", "datasource": {"type": "prometheus", "uid": "prometheus"}}
+        ],
+        "fieldConfig": {"defaults": {"unit": "ops"}}
+      }
+    ]
+  }
+}

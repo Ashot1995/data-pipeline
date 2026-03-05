@@ -1,0 +1,22 @@
+# Contact points for alert notifications.
+# Set GF_ALERTING_WEBHOOK_URL in env to send alerts to a webhook (optional).
+
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: default-webhook
+    receivers:
+      - uid: webhook-default
+        type: webhook
+        settings:
+          url: ${GF_ALERTING_WEBHOOK_URL}
+        disableResolveMessage: false
+  - orgId: 1
+    name: default-email
+    receivers:
+      - uid: email-default
+        type: email
+        settings:
+          addresses: ${GF_ALERTING_EMAIL:-}
+        disableResolveMessage: false

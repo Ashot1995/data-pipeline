@@ -1,0 +1,51 @@
+{
+  "dashboard": {
+    "title": "Database Health",
+    "uid": "database-health",
+    "schemaVersion": 36,
+    "version": 1,
+    "tags": ["database", "postgres", "timescaledb"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {"from": "now-1h", "to": "now"},
+    "templating": {"list": []},
+    "panels": [
+      {
+        "id": 1,
+        "title": "DB connections",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 5},
+        "targets": [{"refId": "A", "expr": "pg_stat_database_numbackends", "legendFormat": "{{datname}}", "datasource": {"type": "prometheus", "uid": "prometheus"}}],
+        "fieldConfig": {"defaults": {"unit": "short"}}
+      },
+      {
+        "id": 2,
+        "title": "Backend pool active / idle / total",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 5},
+        "targets": [
+          {"refId": "A", "expr": "db_connection_pool_size{job=\"backend\", state=\"active\"}", "legendFormat": "active", "datasource": {"type": "prometheus", "uid": "prometheus"}},
+          {"refId": "B", "expr": "db_connection_pool_size{job=\"backend\", state=\"idle\"}", "legendFormat": "idle", "datasource": {"type": "prometheus", "uid": "prometheus"}},
+          {"refId": "C", "expr": "db_connection_pool_size{job=\"backend\", state=\"total\"}", "legendFormat": "total", "datasource": {"type": "prometheus", "uid": "prometheus"}}
+        ],
+        "fieldConfig": {"defaults": {"unit": "short"}}
+      },
+      {
+        "id": 3,
+        "title": "DB insert rate",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 5, "w": 12, "h": 5},
+        "targets": [{"refId": "A", "expr": "rate(db_operations_total{job=\"backend\", operation=\"insert\"}[5m])", "legendFormat": "insert/s", "datasource": {"type": "prometheus", "uid": "prometheus"}}],
+        "fieldConfig": {"defaults": {"unit": "short"}}
+      },
+      {
+        "id": 4,
+        "title": "Sensor data ingested rate",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 5, "w": 12, "h": 5},
+        "targets": [{"refId": "A", "expr": "rate(sensor_data_ingested_total{job=\"backend\"}[5m])", "legendFormat": "ingested/s", "datasource": {"type": "prometheus", "uid": "prometheus"}}],
+        "fieldConfig": {"defaults": {"unit": "short"}}
+      }
+    ]
+  }
+}
