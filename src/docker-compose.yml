@@ -234,8 +234,8 @@ services:
 
   test:
     build:
-      context: ./tests
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: tests/Dockerfile
     container_name: sensor_tests
     profiles:
       - test
@@ -247,6 +247,8 @@ services:
       DB_USER: ${POSTGRES_USER:-postgres}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       REDIS_HOST: redis
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-test-jwt-secret-key-for-ci-only-32x}
+    restart: "no"
     depends_on:
       backend:
         condition: service_healthy

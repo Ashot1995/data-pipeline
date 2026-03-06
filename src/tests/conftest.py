@@ -73,11 +73,11 @@ async def db_pool():
             "asyncpg not available - install dependencies: pip install -r requirements-dev.txt"
         )
 
-    db_host = os.getenv("TEST_DB_HOST", "localhost")
-    db_port = int(os.getenv("TEST_DB_PORT", "5433"))
-    db_name = os.getenv("TEST_DB_NAME", "sensor_db")
-    db_user = os.getenv("TEST_DB_USER", "postgres")
-    db_password = os.getenv("TEST_DB_PASSWORD", "postgres")
+    db_host = os.getenv("TEST_DB_HOST", os.getenv("DB_HOST", "localhost"))
+    db_port = int(os.getenv("TEST_DB_PORT", os.getenv("DB_PORT", "5433")))
+    db_name = os.getenv("TEST_DB_NAME", os.getenv("DB_NAME", "sensor_db"))
+    db_user = os.getenv("TEST_DB_USER", os.getenv("DB_USER", "postgres"))
+    db_password = os.getenv("TEST_DB_PASSWORD", os.getenv("DB_PASSWORD", "postgres"))
 
     try:
         pool = await asyncpg.create_pool(

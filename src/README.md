@@ -277,7 +277,8 @@ CREATE TABLE sensor_data (
     sent_timestamp     TIMESTAMP,
     received_timestamp TIMESTAMP,
     stored_timestamp   TIMESTAMP NOT NULL DEFAULT NOW(),
-    latency_ms         DOUBLE PRECISION
+    latency_ms         DOUBLE PRECISION,
+    device_id          VARCHAR(64)
 );
 
 -- Converted to a TimescaleDB hypertable on stored_timestamp
@@ -285,9 +286,9 @@ SELECT create_hypertable('sensor_data', 'stored_timestamp');
 ```
 
 > **Note:** The API accepts `gas_level` (input) and returns `gas_level` (response), but the
-> database column is named `gas`. Similarly, `device_id` and `timestamp` are validated at the
-> API layer but are not persisted — only `temperature`, `humidity`, `gas`, `sent_timestamp`,
-> `received_timestamp`, `stored_timestamp`, and `latency_ms` are stored.
+> database column is named `gas`. `device_id` is stored and used for per-device queries.
+> `timestamp` is validated at the API layer but not persisted — it is echoed back as
+> `sent_timestamp` in the response.
 
 ## 🧪 Testing
 

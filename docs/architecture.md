@@ -68,7 +68,8 @@ CREATE TABLE sensor_data (
     sent_timestamp     TIMESTAMP,
     received_timestamp TIMESTAMP,
     stored_timestamp   TIMESTAMP NOT NULL DEFAULT NOW(),
-    latency_ms         DOUBLE PRECISION
+    latency_ms         DOUBLE PRECISION,
+    device_id          VARCHAR(64)
 );
 
 -- Converted to a TimescaleDB hypertable on stored_timestamp
@@ -79,7 +80,7 @@ SELECT create_hypertable('sensor_data', 'stored_timestamp');
 
 | API input field | DB column         | Notes                                      |
 |-----------------|-------------------|--------------------------------------------|
-| `device_id`     | *(not stored)*    | Validated (1–64 chars), echoed in response |
+| `device_id`     | `device_id`       | Stored (VARCHAR 64); used for per-device queries |
 | `timestamp`     | *(not stored)*    | Validated, echoed via `sent_timestamp`     |
 | `temperature`   | `temperature`     | −50.0 to 100.0 °C                          |
 | `humidity`      | `humidity`        | 0.0 to 100.0 %                             |
@@ -89,9 +90,8 @@ SELECT create_hypertable('sensor_data', 'stored_timestamp');
 | *(backend)*     | `stored_timestamp`| Set by backend after DB insert             |
 | *(backend)*     | `latency_ms`      | Computed: `received − sent` in ms          |
 
-> **Known gap (DX-02):** `device_id` and `timestamp` are not persisted. The functional spec
-> (`context/spec/001-sensor-monitoring-system/`) requires `device_id` for per-device queries.
-> This is tracked in TASKS.md as a schema migration item.
+> **Note:** `timestamp` (the client-side measurement time) is not persisted to the database.
+> It is validated and echoed back as `sent_timestamp` in the API response only.
 
 ## Key Design Decisions
 

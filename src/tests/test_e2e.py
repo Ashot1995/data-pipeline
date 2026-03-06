@@ -4,6 +4,7 @@ End-to-End Tests - TEST-INFRA-4
 Tests for full system integration including generator → backend → database flow.
 """
 
+import os
 import pytest
 import time
 import requests
@@ -19,7 +20,7 @@ class TestEndToEndFlow:
     @pytest.fixture
     def backend_url(self):
         """Backend URL for testing."""
-        return "http://localhost:8001"
+        return os.getenv("BACKEND_URL", "http://localhost:8001")
 
     def test_backend_health(self, backend_url):
         """Test that backend is healthy."""
@@ -34,9 +35,11 @@ class TestEndToEndFlow:
         try:
             # Send test data
             test_data = {
+                "device_id": "e2e-test-sensor",
+                "timestamp": datetime.now().isoformat(),
                 "temperature": 25.0,
                 "humidity": 50.0,
-                "gas": 200.0,
+                "gas_level": 200.0,
                 "sent_timestamp": datetime.now().isoformat(),
             }
 
@@ -55,7 +58,13 @@ class TestEndToEndFlow:
         """Test data retrieval after ingestion."""
         try:
             # Insert data
-            test_data = {"temperature": 24.0, "humidity": 48.0, "gas": 180.0}
+            test_data = {
+                "device_id": "e2e-test-sensor",
+                "timestamp": datetime.now().isoformat(),
+                "temperature": 24.0,
+                "humidity": 48.0,
+                "gas_level": 180.0,
+            }
             requests.post(f"{backend_url}/api/data", json=test_data, timeout=10)
 
             # Wait a bit for processing
@@ -77,9 +86,11 @@ class TestEndToEndFlow:
             # Send data with timestamp
             sent_time = datetime.now()
             test_data = {
+                "device_id": "e2e-test-sensor",
+                "timestamp": sent_time.isoformat(),
                 "temperature": 23.5,
                 "humidity": 45.0,
-                "gas": 175.0,
+                "gas_level": 175.0,
                 "sent_timestamp": sent_time.isoformat(),
             }
 
@@ -103,7 +114,13 @@ class TestEndToEndFlow:
         try:
             # Insert multiple data points
             for i in range(5):
-                test_data = {"temperature": 23.0 + i, "humidity": 45.0 + i, "gas": 175.0 + i}
+                test_data = {
+                    "device_id": "e2e-test-sensor",
+                    "timestamp": datetime.now().isoformat(),
+                    "temperature": 23.0 + i,
+                    "humidity": 45.0 + i,
+                    "gas_level": 175.0 + i,
+                }
                 requests.post(f"{backend_url}/api/data", json=test_data, timeout=10)
                 time.sleep(0.1)
 
@@ -125,9 +142,11 @@ class TestEndToEndFlow:
             sent_count = 0
             for i in range(10):
                 test_data = {
+                    "device_id": "e2e-test-sensor",
+                    "timestamp": datetime.now().isoformat(),
                     "temperature": 23.0 + (i * 0.5),
                     "humidity": 45.0 + (i * 1.0),
-                    "gas": 175.0 + (i * 2.0),
+                    "gas_level": 175.0 + (i * 2.0),
                 }
                 response = requests.post(f"{backend_url}/api/data", json=test_data, timeout=10)
                 if response.status_code == 200:
@@ -148,8 +167,14 @@ class TestEndToEndFlow:
     def test_error_handling(self, backend_url):
         """Test error handling for invalid data."""
         try:
-            # Test invalid data
-            invalid_data = {"temperature": 150.0, "humidity": 45.0, "gas": 175.0}
+            # Test invalid data — temperature out of range, all required fields present
+            invalid_data = {
+                "device_id": "e2e-test-sensor",
+                "timestamp": datetime.now().isoformat(),
+                "temperature": 150.0,
+                "humidity": 45.0,
+                "gas_level": 175.0,
+            }
             response = requests.post(f"{backend_url}/api/data", json=invalid_data, timeout=10)
 
             # Should return 422 for validation error

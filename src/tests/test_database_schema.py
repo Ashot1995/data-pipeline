@@ -52,6 +52,7 @@ class TestDatabaseSchema:
                 "received_timestamp",
                 "stored_timestamp",
                 "latency_ms",
+                "device_id",
             ]
 
             for col in required_columns:
